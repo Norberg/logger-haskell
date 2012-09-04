@@ -1,0 +1,3 @@
+Haskell implementation of https://github.com/Norberg/logger
+
+Using MongoDB instead of SQLite
