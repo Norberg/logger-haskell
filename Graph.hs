@@ -1,15 +1,19 @@
+module Graph(renderGraph) where
+
+{-
 import System.Locale
 import Data.Time.Calendar
 import Data.Time.Format 
 import Data.Time.LocalTime
-import Data.Colour.Names
-import Data.Colour
-import Data.Accessor
 import Data.Maybe
+-}
+import Data.Colour
+import Data.Colour.Names
+import Data.Accessor
 import Graphics.Rendering.Chart
 import Graphics.Rendering.Chart.Gtk
-import Prices
-
+--import Prices
+{-
 tempOrg = [("2012-08-25 00:25", 15.9),
 	("2012-08-25 01:15",15.3),
 	("2012-08-25 02:05",15.1),
@@ -35,13 +39,13 @@ tempOrg = [("2012-08-25 00:25", 15.9),
 	("2012-08-25 18:45",7.5),
 	("2012-08-25 19:35",7.3)
 	]
+---}
+--temp :: [(LocalTime, Double)]
+--temp = map convertTemp tempOrg
 
-temp :: [(LocalTime, Double)]
-temp = map convertTemp tempOrg
-
-tempIn :: [(LocalTime, Double)]
-tempIn = map convertTempIn temp
-
+--tempIn :: [(LocalTime, Double)]
+--tempIn = map convertTempIn temp
+{-
 convertTempIn :: (LocalTime, Double) -> (LocalTime, Double)
 convertTempIn d = (fst d, (snd d) - 2)
 
@@ -49,8 +53,9 @@ convertTemp d = (fromJust(fromIso8061 (fst d)), snd d)
 
 fromIso8061 :: String -> Maybe LocalTime
 fromIso8061 str = parseTime defaultTimeLocale "%F %R" str
+-}
 
-chart = layout 
+chart temp tempIn = layout 
   where
 
     price1 = plot_lines_style .> line_color ^= opaque blue
@@ -68,5 +73,7 @@ chart = layout
                                Right (toPlot price2)]
            $ defaultLayout1
 
-main = do
-    renderableToWindow (toRenderable chart) 640 480
+--main = renderGraph temp tempIn
+
+renderGraph temp tempIn  = do
+    renderableToWindow (toRenderable (chart temp tempIn)) 640 480

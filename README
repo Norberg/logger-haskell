@@ -1,3 +1,4 @@
 Haskell implementation of https://github.com/Norberg/logger
 
 Using MongoDB instead of SQLite
+sensorMigrater.py will convert from SQLite to MongoDB

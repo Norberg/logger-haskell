@@ -1,9 +1,10 @@
 SRC=$(wildcard *.hs)
 
 default:
-	ghc graph.hs -o graph
+	ghc Graph.hs -Wall
+	ghc database.hs -o database -Wall
 run: default
-	./graph
+	./database
 
 clean:
 	\rm *.hi
