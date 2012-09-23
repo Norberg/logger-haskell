@@ -23,11 +23,14 @@ def main():
 		add_reading(row[0] +"T"+ row[1], row[2], row[4])
 	
 	for d,r in old_readings.items():
-		date = fromISO(d)
-		ind = r["indoor"]
-		out = r["outdoor"]
-		doc = {"datetime": date, "readings" : {"indoor":ind, "outdoor":out}}
-		readings.insert(doc)
+		try:
+			date = fromISO(d)
+			ind = float(r["indoor"])
+			out = float(r["outdoor"])
+			doc = {"datetime": date, "readings" : {"indoor":ind, "outdoor":out}}
+			readings.insert(doc)
+		except:
+			print "could not insert row:", r
 	c.close()
 			
 
