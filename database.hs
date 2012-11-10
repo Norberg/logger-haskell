@@ -1,33 +1,62 @@
 {-# LANGUAGE OverloadedStrings, ExtendedDefaultRules #-}
 import System.Locale
 import Database.MongoDB
+import Data.Time.Calendar
 import Data.Time.Clock
 import Data.Time.Format 
 import Data.Time.LocalTime
 import Data.Maybe
 import Graph
+import Graphics.GD
 
 --main :: IO ()
 main = do
 	pipe <- runIOE $ connect $ host "atom"
-	generateGraph pipe lte gte filename where 
-		lte = fromIso8061 "2012-07-07 00:00"
-		gte = fromIso8061 "2012-07-06 00:00"
-		filename = "test.png"
-	--close pipe
+	generateDaily pipe
+	generateMonthly pipe
+	generateWeekly pipe
+	close pipe
+	
+
+generateDaily pipe = do
+	currentTime <- getCurrentTime
+	let midnight = UTCTime (utctDay currentTime) 0 
+	generateGraph pipe currentTime midnight filename where 
+		filename = "www/daily.png"
+
+generateWeekly pipe = do
+	currentTime <- getCurrentTime
+	let oneWeekAgo' = addDays (-7) ( utctDay currentTime)
+	let oneWeekAgo = UTCTime oneWeekAgo' 0 
+	generateGraph pipe currentTime oneWeekAgo filename where 
+		filename = "www/weekly.png"
+
+generateMonthly pipe = do
+	currentTime <- getCurrentTime
+	let oneMonthAgo' = addGregorianMonthsClip (-1) ( utctDay currentTime)
+	let oneMonthAgo = UTCTime oneMonthAgo' 0 
+	generateGraph pipe currentTime oneMonthAgo filename where 
+		filename = "www/monthly.png"
 
 generateGraph pipe lte gte filename = do
 	e <- access pipe master "sensors" (getRange lte gte)
 	let h = getRight e
 	let indoor = concat $ map (fromMongo "indoor") h
 	let outdoor = concat $ map (fromMongo "outdoor") h
-	renderGraph indoor outdoor "test.png"
+	renderGraph indoor outdoor filename
 
-run :: Action IO [Document]
-run = do
-	getRange lte gte where 
-		lte = fromIso8061 "2012-07-07 00:00"
-		gte = fromIso8061 "2012-07-06 00:00"
+--BUG: Rezised images is bigger than original, know GD problem
+createThumbnails = do
+	createThumbnail "www/daily.png" 860 573 "www/daily.860x573.png"
+	createThumbnail "www/daily.png" 560 373 "www/daily.560x373.png"
+	createThumbnail "www/weekly.png" 560 373 "www/weekly.560x373.png"
+	createThumbnail "www/monthly.png" 560 373 "www/monthly.560x373.png"
+
+createThumbnail input x y output = do
+	inputImage <- loadPngFile input
+	resizedImage <- resizeImage x y inputImage
+	savePngFile output resizedImage
+
 
 -- Access label/value from Field
 -- label field
@@ -39,12 +68,10 @@ fromMongo sensor doc = [(datetime, reading)] where
 	reading = at sensor readings where
 		readings = at "readings" doc
 
-
 getRight ::  Either Failure [Document] -> [Document]	
-fromValue doc = typed $ valueAt "datetime" doc
 getRight e = case e of
-	Left e -> error "Error reading documents: "
-	Right e -> e
+	Left _ -> error "Error reading documents: "
+	Right d -> d
 
 fromIso8061 :: String -> UTCTime
 fromIso8061 str = fromJust(parseTime defaultTimeLocale "%F %R" str)
