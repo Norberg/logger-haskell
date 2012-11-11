@@ -1,11 +1,9 @@
 SRC=$(wildcard *.hs)
 
 default:
-	ghc Graph.hs -Wall
-	ghc database.hs -o database -Wall
+	ghc -O --make logger.hs -o logger -Wall
 run: default
-	./database
-	eog test.png
+	./logger
 
 clean:
 	\rm *.hi

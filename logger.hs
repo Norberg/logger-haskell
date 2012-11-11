@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings, ExtendedDefaultRules #-}
+import Control.Concurrent
 import System.Locale
 import Database.MongoDB
 import Data.Time.Calendar
@@ -8,15 +9,23 @@ import Data.Time.LocalTime
 import Data.Maybe
 import Graph
 import Graphics.GD
+import RecvReading
 
 --main :: IO ()
-main = do
+main = do		
 	pipe <- runIOE $ connect $ host "atom"
+
+	reading <- recvReading
+	let readingOutdoor = read $ last $ outdoor reading :: Float
+	let readingIndoor = read $ last $ indoor reading :: Float
+	insertReading pipe readingOutdoor readingIndoor
+
 	generateDaily pipe
 	generateMonthly pipe
 	generateWeekly pipe
 	close pipe
 	
+
 
 generateDaily pipe = do
 	currentTime <- getCurrentTime
@@ -57,10 +66,15 @@ createThumbnail input x y output = do
 	resizedImage <- resizeImage x y inputImage
 	savePngFile output resizedImage
 
-
--- Access label/value from Field
--- label field
--- value field
+insertReading pipe outdoor indoor = do
+	currentTime <- getCurrentTime
+	let reading = ["readings" =: 
+			  ["outdoor" =: outdoor,
+			   "indoor" =: indoor],
+	              "datetime" =: currentTime]
+	e <- access pipe master "sensors" (insert "temperatures" reading)
+	return e
+		
 
 fromMongo :: Label -> Document -> [(LocalTime, Double)]
 fromMongo sensor doc = [(datetime, reading)] where

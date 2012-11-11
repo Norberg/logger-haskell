@@ -2,3 +2,7 @@ Haskell implementation of https://github.com/Norberg/logger
 
 Using MongoDB instead of SQLite
 sensorMigrater.py will convert from SQLite to MongoDB
+
+should be triggerd periodically by crontab, standard once every 5 minutes
+add crontab to system by running:
+sudo ln /home/simon/logger-haskell/crontab-logger /etc/cron.d/logger
