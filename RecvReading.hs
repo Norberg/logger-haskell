@@ -7,7 +7,6 @@ import Text.JSON.Generic
 --TODO dont depend on exactlly this json
 data Reading = Reading {
 	outdoor :: [String],
-	flower1 :: [String],
 	indoor :: [String]
 } deriving (Eq, Show, Data, Typeable)
 
