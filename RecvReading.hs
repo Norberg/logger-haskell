@@ -12,7 +12,7 @@ data Reading = Reading {
 
 recvReading :: IO Reading
 recvReading = do
-	handle <- connectTo "sheeva" (PortNumber 7011)
+	handle <- connectTo "localhost" (PortNumber 7011)
 	json <- hGetContents handle
 	let reading = decodeJSON json :: Reading
 	return reading
